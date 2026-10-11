@@ -1,0 +1,8 @@
+# Generierte Exporte (SCORM etc.) entstehen per GitHub Action
+export/
+node_modules/
+
+# Lokale Claude-Code-Konfiguration
+.claude/
+
+.DS_Store

@@ -1,0 +1,43 @@
+name: SCORM-Export
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    env:
+      # Der SCORM-Export braucht keinen Browser; spart den Chromium-Download
+      PUPPETEER_SKIP_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: SCORM-Paket erzeugen (Moodle 4/5)
+        run: |
+          npx -y @liascript/exporter \
+            -i psychologie_als_wissenschaft.md \
+            -f presets --moodle4 \
+            --scorm-organization "Psychologie als Wissenschaft" \
+            --scorm-typicalDuration PT1H30M0S \
+            -o export/psychologie_als_wissenschaft_moodle
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scorm-moodle
+          path: export/psychologie_als_wissenschaft_moodle.zip
+
+      - name: An Release anhängen
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: export/psychologie_als_wissenschaft_moodle.zip
